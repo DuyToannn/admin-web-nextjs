@@ -6,7 +6,7 @@ import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from "react";
 import UserCreate from "@/components/admin/user.create";
 import UserUpdate from "@/components/admin/user.update";
-
+import './styleAdmin.css';
 
 interface IProps {
     users: any;
@@ -52,6 +52,16 @@ const UserTable = (props: IProps) => {
             title: 'Kích hoạt TK',
             dataIndex: 'isActive',
             render: (text: boolean) => (text ? 'Đã kích hoạt' : 'Chưa kích hoạt'),
+        },
+        {
+            title: 'Trạng Thái',
+            dataIndex: 'isOnline',
+            render: (isOnline: boolean) => (
+                <span className="span-online">
+                    <span className={isOnline ? 'online-circle' : 'offline-circle'}></span>
+                    {isOnline ? 'Online' : 'Offline'}
+                </span>
+            ),
         },
         {
             title: 'Hành động',

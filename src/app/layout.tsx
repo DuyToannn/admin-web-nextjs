@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Roboto } from 'next/font/google'
 import { AntdRegistry } from '@ant-design/nextjs-registry';
 
 import '@/app/globals.css';
 import NextAuthWrapper from "@/library/next.auth.wrapper";
 
-const inter = Inter({ subsets: ["latin"] });
+const roboto = Roboto({
+  subsets: ['latin'],
+  weight: ['400', '500', '700'],
+});
 
 export const metadata: Metadata = {
   title: "Duy Toan",
@@ -19,7 +22,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={roboto.className}>
         <AntdRegistry>
           <NextAuthWrapper>
             {children}

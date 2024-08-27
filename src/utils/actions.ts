@@ -1,6 +1,6 @@
 'use server'
 
-import { auth, signIn } from "@/auth";
+import { auth, signIn, signOut } from "@/auth";
 import { revalidateTag } from 'next/cache'
 import { sendRequest } from "./api";
 
@@ -75,4 +75,23 @@ export const handleDeleteUserAction = async (id: any) => {
     })
     revalidateTag("list-users")
     return res;
+}
+
+export const handleLogoutAction = async (email: string) => {
+    try {
+        const session = await auth();
+        const res = await sendRequest<IBackendRes<any>>({
+            url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/auth/logout`,
+            method: "POST",
+            headers: {
+                Authorization: `Bearer ${session?.user?.access_token}`,
+            },
+            body: { email }
+        });
+        await signOut({ redirect: false });
+        return res;
+    } catch (error) {
+        console.error("Logout error:", error);
+        throw new Error("Logout failed");
+    }
 }

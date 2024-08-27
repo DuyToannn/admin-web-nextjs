@@ -49,7 +49,7 @@ const UserUpdate = (props: IProps) => {
             })
             if (res?.data) {
                 handleCloseUpdateModal();
-                message.success("Update user succeed")
+                message.success("Chỉnh sửa thành công")
             } else {
                 notification.error({
                     message: "Update User error",

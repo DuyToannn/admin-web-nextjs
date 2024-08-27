@@ -7,12 +7,23 @@ import { DownOutlined, SmileOutlined } from '@ant-design/icons';
 import type { MenuProps } from 'antd';
 import { Dropdown, Space } from 'antd';
 import { signOut } from 'next-auth/react';
-
+import { handleLogoutAction } from '@/utils/actions';
+import { useRouter } from 'next/navigation';
 const AdminHeader = (props: any) => {
     const { session } = props;
     const { Header } = Layout;
     const { collapseMenu, setCollapseMenu } = useContext(AdminContext)!;
-
+    const router = useRouter();
+    const handleLogout = async () => {
+        try {
+            if (session?.user?.email) {
+                await handleLogoutAction(session.user.email);
+            }
+            router.push('/'); 
+        } catch (error) {
+            console.error("Logout failed:", error);
+        }
+    };
     const items: MenuProps['items'] = [
         {
             key: '1',
@@ -25,7 +36,7 @@ const AdminHeader = (props: any) => {
         {
             key: '4',
             danger: true,
-            label: <span onClick={() => signOut()}>Đăng xuất</span>,
+            label: <span onClick={handleLogout}>Đăng xuất</span>,
         },
     ];
 
