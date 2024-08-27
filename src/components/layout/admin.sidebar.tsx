@@ -26,13 +26,13 @@ const AdminSideBar = () => {
             type: 'group',
             children: [
                 {
-                    key: "dashboard",
+                    key: "Thống kê",
                     label: <Link href={"/dashboard"}>Dashboard</Link>,
                     icon: <AppstoreOutlined />,
                 },
                 {
                     key: "users",
-                    label: <Link href={"/dashboard/user"}>Manage Users</Link>,
+                    label: <Link href={"/dashboard/user"}>Quản lý thành viên</Link>,
                     icon: <TeamOutlined />,
                 },
                 {
