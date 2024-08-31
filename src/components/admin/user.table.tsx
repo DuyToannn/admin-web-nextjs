@@ -57,11 +57,11 @@ const UserTable = (props: IProps) => {
             title: 'Trạng Thái',
             dataIndex: 'isOnline',
             render: (isOnline: boolean) => (
-                <span className="span-online">
+                <span className={isOnline ? 'span-online online-text' : 'span-online offline-text'}>
                     <span className={isOnline ? 'online-circle' : 'offline-circle'}></span>
                     {isOnline ? 'Online' : 'Offline'}
                 </span>
-            ),
+            )
         },
         {
             title: 'Hành động',
