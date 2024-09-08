@@ -3,10 +3,10 @@ import Layout from "antd/es/layout";
 import Menu from "antd/es/menu";
 import {
     AppstoreOutlined,
-    MailOutlined,
     SettingOutlined,
     TeamOutlined,
-
+    DropboxOutlined,
+    VideoCameraOutlined,
 } from '@ant-design/icons';
 import React, { useContext } from 'react';
 import { AdminContext } from "@/library/admin.context";
@@ -26,8 +26,8 @@ const AdminSideBar = () => {
             type: 'group',
             children: [
                 {
-                    key: "Thống kê",
-                    label: <Link href={"/dashboard"}>Dashboard</Link>,
+                    key: "dashboard",
+                    label: <Link href={"/dashboard"}>Tổng quan</Link>,
                     icon: <AppstoreOutlined />,
                 },
                 {
@@ -36,60 +36,35 @@ const AdminSideBar = () => {
                     icon: <TeamOutlined />,
                 },
                 {
+                    key: "categories",
+                    label: <Link href={"/dashboard/categories"}>Quản lý danh mục</Link>,
+                    icon: <AppstoreOutlined />,
+                },
+                {
+                    key: "video",
+                    label: <Link href={"/dashboard/videos"}>Quản lý video</Link>,
+                    icon: <VideoCameraOutlined />,
+                },
+                {
                     key: 'sub1',
-                    label: 'Navigation One',
-                    icon: <MailOutlined />,
+                    label: 'Cài đặt',
+                    icon: <SettingOutlined />,
                     children: [
                         {
                             key: 'g1',
-                            label: 'Item 1',
                             type: 'group',
                             children: [
-                                { key: '1', label: 'Option 1' },
-                                { key: '2', label: 'Option 2' },
-                            ],
-                        },
-                        {
-                            key: 'g2',
-                            label: 'Item 2',
-                            type: 'group',
-                            children: [
-                                { key: '3', label: 'Option 3' },
-                                { key: '4', label: 'Option 4' },
-                            ],
-                        },
-                    ],
-                },
-                {
-                    key: 'sub2',
-                    label: 'Navigation Two',
-                    icon: <AppstoreOutlined />,
-                    children: [
-                        { key: '5', label: 'Option 5' },
-                        { key: '6', label: 'Option 6' },
-                        {
-                            key: 'sub3',
-                            label: 'Submenu',
-                            children: [
-                                { key: '7', label: 'Option 7' },
-                                { key: '8', label: 'Option 8' },
+                                {
+                                    key: '1',
+                                    label: <Link href={"/dashboard/dropbox"}>Dropbox</Link>,
+                                    icon: <DropboxOutlined />,
+                                },
                             ],
                         },
                     ],
                 },
                 {
                     type: 'divider',
-                },
-                {
-                    key: 'sub4',
-                    label: 'Navigation Three',
-                    icon: <SettingOutlined />,
-                    children: [
-                        { key: '9', label: 'Option 9' },
-                        { key: '10', label: 'Option 10' },
-                        { key: '11', label: 'Option 11' },
-                        { key: '12', label: 'Option 12' },
-                    ],
                 },
             ],
         },

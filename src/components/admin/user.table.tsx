@@ -18,7 +18,8 @@ interface IProps {
     }
 }
 const UserTable = (props: IProps) => {
-    const { users, meta } = props;
+    const { users, meta = { current: 1, pageSize: 10, pages: 1, total: 0 } } = props;
+
     const searchParams = useSearchParams();
     const pathname = usePathname();
     const { replace } = useRouter();
@@ -112,8 +113,15 @@ const UserTable = (props: IProps) => {
                 alignItems: "center",
                 marginBottom: 20
             }}>
-                <span>Manager Users</span>
-                <Button onClick={() => setIsCreateModalOpen(true)}>Create User</Button>
+                <span>Quản lý người dùng</span>
+                <Button style={{
+                    backgroundColor: '#6A9C89',
+                    color: '#FFFFFF',
+
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1
+                }} onClick={() => setIsCreateModalOpen(true)}>Thêm người dùng</Button>
             </div>
             <Table
                 bordered
