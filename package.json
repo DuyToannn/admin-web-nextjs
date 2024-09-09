@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "5.4.0",
     "@ant-design/nextjs-registry": "^1.0.0",
+    "@emotion/styled": "^11.13.0",
     "antd": "5.19.3",
     "antd-style": "^3.6.2",
     "axios": "^1.7.7",

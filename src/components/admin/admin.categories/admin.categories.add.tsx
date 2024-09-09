@@ -1,3 +1,4 @@
+import { handleCreateCategoryAction } from '@/utils/actions';
 import {
     Modal, Input, Form, Row, Col, message,
     notification
@@ -23,9 +24,17 @@ const AdminCategoriesAdd = (props: IProps) => {
     }
 
     const onFinish = async (values: any) => {
-        // Handle form submission here
+        const res = await handleCreateCategoryAction(values);
+        if (res?.data) {
+            handleCloseCreateModal();
+            message.success("Tạo danh mục thành công")
+        } else {
+            notification.error({
+                message: "Create Category error",
+                description: res?.message
+            })
+        }
     }
-
     return (
         <Modal
             title="Thêm danh mục"

@@ -2,27 +2,55 @@ import {
     Modal, Input, Form, Row, Col, message,
     notification
 } from 'antd';
-
+import { handleUpdateCategoryAction } from '@/utils/actions';
+import { useEffect } from 'react';
 interface IProps {
     isCreateModalOpen: boolean;
     setIsCreateModalOpen: (v: boolean) => void;
+    dataUpdate: any;
+    setDataUpdate: any;
 }
 
 const AdminCategoriesEdit = (props: IProps) => {
 
     const {
-        isCreateModalOpen, setIsCreateModalOpen
+        isCreateModalOpen, setIsCreateModalOpen,
+        dataUpdate, setDataUpdate
     } = props;
     const [form] = Form.useForm();
 
     const handleCloseCreateModal = () => {
         form.resetFields()
         setIsCreateModalOpen(false);
+        setDataUpdate(null)
     }
-
+    useEffect(() => {
+        if (dataUpdate) {
+            //code
+            form.setFieldsValue({
+                name: dataUpdate.name,
+                description: dataUpdate.description,
+            })
+        }
+    }, [dataUpdate])
     const onFinish = async (values: any) => {
-        // Handle form submission here
-    }
+        if (dataUpdate) {
+            const { name, description } = values;
+            const res = await handleUpdateCategoryAction({
+                _id: dataUpdate._id, name, description
+            })
+            if (res?.data) {
+                handleCloseCreateModal();
+                message.success("Chỉnh sửa thành công")
+            } else {
+                notification.error({
+                    message: "Update Category error",
+                    description: res?.message
+                })
+            }
+
+        }
+    };
 
     return (
         <Modal

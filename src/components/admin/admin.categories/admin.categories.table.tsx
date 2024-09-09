@@ -1,130 +1,186 @@
 'use client'
 import React, { useState } from 'react'
-import { Space, Table, Button } from 'antd';
+import { Space, Table, Button, Popconfirm, message } from 'antd';
 import type { TableProps } from 'antd';
-import { DeleteTwoTone, EditTwoTone, PlusOutlined } from "@ant-design/icons";
+import { DeleteTwoTone, EditTwoTone, EyeInvisibleOutlined, EyeOutlined } from "@ant-design/icons";
 import AdminCategoriesAdd from './admin.categories.add';
 import AdminCategoriesEdit from './admin.categories.edit';
-
-interface DataType {
-    key: string;
-    name: string;
-    description: string;
-    totalVideos: number;
-    isActive: boolean;
-    createdAt: string;
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { handleDeleteCategoryAction } from '@/utils/actions';
+import { Tag } from 'antd';
+import { handleToggleCategoryAction } from '@/utils/actions';
+interface IProps {
+    categories: any[];
+    meta: {
+        current: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+    }
 }
 
-const AdminCategories: React.FC = () => {
+const AdminCategories = (props: IProps) => {
+    const { categories, meta } = props;
     const [isCreateModalOpen, setIsCreateModalOpen] = useState<boolean>(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState<boolean>(false);
+    const [dataUpdate, setDataUpdate] = useState<any>(null);
 
-    const columns: TableProps<DataType>['columns'] = [
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { replace } = useRouter();
+
+    const columns: TableProps<any>['columns'] = [
         {
             title: 'STT',
-            dataIndex: 'stt',
-            key: 'stt',
+            key: 'index',
+            width: 50,
+            align: 'center',
             render: (text, record, index) => (
-                <span>{index + 1}</span>
+                <span>{(meta.current - 1) * meta.pageSize + index + 1}</span>
             ),
         },
         {
-            title: 'Tên',
+            title: 'Danh mục',
             dataIndex: 'name',
             key: 'name',
-            render: (text) => <a>{text}</a>,
         },
         {
-            title: 'Nội dung',
+            title: 'Mô tả',
             dataIndex: 'description',
             key: 'description',
+            width: 200,
+            render: (description: string) => (
+                <span>
+                    {description.length > 50 ? `${description.slice(0, 50)}...` : description}
+                </span>
+            ),
         },
         {
             title: 'Số lượng video',
             dataIndex: 'totalVideos',
             key: 'totalVideos',
+            align: 'center',
         },
         {
             title: 'Ngày tạo',
             dataIndex: 'createdAt',
             key: 'createdAt',
+            render: (createdAt: string) => {
+                const date = new Date(createdAt);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            },
         },
         {
             title: 'Trạng thái',
             dataIndex: 'isActive',
             key: 'isActive',
+            render: (isActive: boolean) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đã kích hoạt' : 'Đã ẩn'}
+                </Tag>
+            ),
         },
         {
             title: 'Hành động',
             key: 'action',
-            align: 'center',
             render: (_, record) => (
                 <Space size="middle">
-                    <EditTwoTone onClick={() => setIsUpdateModalOpen(true)} twoToneColor="#f57800" style={{ cursor: "pointer" }} />
-                    <DeleteTwoTone onClick={() => { }} twoToneColor="#ff4d4f" style={{ cursor: "pointer" }} />
-                    <Button style={{
-                        backgroundColor: '#6A9C89',
-                        color: '#E9EFEC',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '10px 15px',
-                        transition: 'all 0.3s',
-                        height: '25px',
-                    }}
-                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
-                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
-                        Kích hoạt
-                    </Button>
+                    <EditTwoTone
+                        onClick={() => {
+                            setIsUpdateModalOpen(true);
+                            setDataUpdate(record);
+                        }}
+                        twoToneColor="#f57800"
+                        style={{ cursor: "pointer" }}
+                    />
+                    <Popconfirm
+                        placement="leftTop"
+                        title={"Xác nhận xóa danh mục"}
+                        description={"Bạn có chắc chắn muốn xóa danh mục này ?"}
+                        onConfirm={() => handleDeleteCategory(record._id)}
+                        okText="Xác nhận"
+                        cancelText="Hủy"
+                    >
+                        <DeleteTwoTone twoToneColor="#ff4d4f" style={{ cursor: "pointer" }} />
+                    </Popconfirm>
+                    {record.isActive ? (
+                        <EyeInvisibleOutlined
+                            onClick={() => handleToggleCategory(record._id)}
+                            style={{ cursor: "pointer", color: "#1890ff" }}
+                        />
+                    ) : (
+                        <EyeOutlined
+                            onClick={() => handleToggleCategory(record._id)}
+                            style={{ cursor: "pointer", color: "#52c41a" }}
+                        />
+                    )}
                 </Space>
             ),
         },
     ];
 
-    const data: DataType[] = [
-        {
-            key: '1',
-            name: 'John Brown',
-            description: 'John Brown',
-            totalVideos: 10,
-            isActive: true,
-            createdAt: '2021-01-01',
-        },
-        {
-            key: '2',
-            name: 'Jim Green',
-            description: 'Jim Green',
-            totalVideos: 10,
-            isActive: true,
-            createdAt: '2021-01-01',
-        },
-        {
-            key: '3',
-            name: 'Joe Black',
-            description: 'Joe Black',
-            totalVideos: 10,
-            isActive: true,
-            createdAt: '2021-01-01',
-        },
-    ];
+    const handleDeleteCategory = async (id: string) => {
+        const res = await handleDeleteCategoryAction(id)
+        if (res?.data) {
+            message.success("Xóa danh mục thành công")
+        } else {
+            message.error("Xóa danh mục thất bại")
+        }
+    }
 
+    const onChange = (pagination: any) => {
+        if (pagination && pagination.current) {
+            const params = new URLSearchParams(searchParams);
+            params.set('current', pagination.current);
+            replace(`${pathname}?${params.toString()}`);
+        }
+    };
+
+    const handleToggleCategory = async (id: string) => {
+        const res = await handleToggleCategoryAction(id)
+        if (res?.data) {
+            message.success("Cập nhật trạng thái danh mục thành công")
+        } else {
+            message.error("Cập nhật trạng thái danh mục thất bại")
+        }
+    }
     return (
         <div style={{ position: 'relative' }}>
             <div style={{
-                display: "flex", justifyContent: "space-between",
+                display: "flex",
+                justifyContent: "space-between",
                 alignItems: "center",
                 marginBottom: 20
             }}>
                 <span>Quản lý danh mục</span>
-                <Button style={{
-                    backgroundColor: '#6A9C89',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    top: '10px',
-                    right: '10px',
-                    zIndex: 1
-                }} onClick={() => setIsCreateModalOpen(true)} >Thêm danh mục</Button>
+                <Button
+                    style={{
+                        backgroundColor: '#6A9C89',
+                        color: '#FFFFFF',
+                        border: 'none',
+                    }}
+                    onClick={() => setIsCreateModalOpen(true)}
+                >
+                    Thêm danh mục
+                </Button>
             </div>
-            <Table bordered columns={columns} dataSource={data} />
+            <Table
+                bordered
+                columns={columns}
+                dataSource={categories}
+                rowKey="_id"
+                pagination={{
+                    current: meta.current,
+                    pageSize: meta.pageSize,
+                    total: meta.total,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} trên ${total} mục`,
+                }}
+                onChange={onChange}
+            />
 
             <AdminCategoriesAdd
                 isCreateModalOpen={isCreateModalOpen}
@@ -135,9 +191,11 @@ const AdminCategories: React.FC = () => {
             <AdminCategoriesEdit
                 isCreateModalOpen={isUpdateModalOpen}
                 setIsCreateModalOpen={setIsUpdateModalOpen}
+                dataUpdate={dataUpdate}
+                setDataUpdate={setDataUpdate}
             />
         </div>
     )
 };
 
-export default AdminCategories
+export default AdminCategories;

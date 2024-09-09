@@ -2,15 +2,16 @@
 import React from 'react'
 import { Button, Space, Table, Tag } from 'antd';
 import type { TableProps } from 'antd';
-
+import { useRouter } from 'next/navigation';
 interface DataType {
     key: string;
     name: string;
-    age: number;
     thumbnail: string;
     category: string;
     duration: string;
     createdAt: string;
+    size: string;
+    resolution: string;
     type: string;
 }
 
@@ -19,6 +20,7 @@ const columns: TableProps<DataType>['columns'] = [
         title: 'Thumbnail',
         dataIndex: 'thumbnail',
         key: 'thumbnail',
+        width: '10%',
         render: (text) => <a>{text}</a>,
     },
     {
@@ -32,21 +34,49 @@ const columns: TableProps<DataType>['columns'] = [
         key: 'category',
     },
     {
-        title: 'Thời lượng',
-        key: 'duration',
-        dataIndex: 'duration',
-
-    },
-    {
-        title: 'Ngày tạo',
-        key: 'createdAt',
-        dataIndex: 'createdAt',
-    },
-    {
         title: 'Loại video',
         key: 'type',
         dataIndex: 'type',
+        render: (type: string) => (
+            <Tag color={type === 'movie' ? 'blue' : 'green'}>
+                {type === 'movie' ? 'Phim lẻ' : 'Phim bộ'}
+            </Tag>
+        ),
     },
+    {
+        title: 'Thời lượng',
+        key: 'duration',
+        dataIndex: 'duration',
+        render: (duration: string) => {
+            // Ensure the duration is in the format 00:00:00
+            const formattedDuration = duration.length === 8 ? duration : '00:00:00';
+            return <span>{formattedDuration}</span>;
+        },
+    },
+    {
+        title: 'Kích thước',
+        key: 'size',
+        dataIndex: 'size',
+    },
+    {
+        title: 'Chất lượng',
+        key: 'resolution',
+        dataIndex: 'resolution',
+    },
+    {
+        title: 'Ngày tạo',
+        dataIndex: 'createdAt',
+        key: 'createdAt',
+        render: (createdAt: string) => {
+            const date = new Date(createdAt);
+            return date.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
+            });
+        },
+    },
+
     {
         title: 'Hành động',
         key: 'action',
@@ -132,37 +162,61 @@ const data: DataType[] = [
     {
         key: '1',
         name: 'John Brown',
-        age: 32,
         thumbnail: 'https://via.placeholder.com/150',
         category: 'Category 1',
-        duration: '10:00',
+        duration: '01:00:00',
         createdAt: '2021-01-01',
-        type: 'Video 1',
+        type: 'series',
+        size: '100MB',
+        resolution: '1080p',
     },
     {
         key: '2',
         name: 'Jim Green',
-        age: 42,
         thumbnail: 'https://via.placeholder.com/150',
         category: 'Category 2',
-        duration: '10:00',
+        duration: '01:00:00',
         createdAt: '2021-01-01',
-        type: 'Video 2',
-
-
+        type: 'series',
+        size: '100MB',
+        resolution: '1080p',
     },
     {
         key: '3',
         name: 'Joe Black',
-        age: 32,
         thumbnail: 'https://via.placeholder.com/150',
         category: 'Category 3',
-        duration: '10:00',
+        duration: '01:00:00',
         createdAt: '2021-01-01',
-        type: 'Video 3',
+        type: 'movie',
+        size: '100MB',
+        resolution: '1080p',
     },
 ];
 
-const VideoPage: React.FC = () => <Table columns={columns} dataSource={data} />;
+const VideoPage: React.FC = () => {
+    const router = useRouter();
+    return (
+        <>
+            <div style={{
+                display: "flex", justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 20
+            }}>
+                <span>Danh sách video</span>
+                <Button onClick={() => router.push('/dashboard/videos/add')} style={{
+
+                    backgroundColor: '#6A9C89',
+                    color: '#FFFFFF',
+
+                    top: '10px',
+                    right: '10px',
+                    zIndex: 1
+                }}>Thêm Video</Button>
+            </div>
+            <Table bordered columns={columns} dataSource={data} />
+        </>
+    );
+};
 
 export default VideoPage;

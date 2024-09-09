@@ -1,7 +1,7 @@
 'use client'
 import { handleDeleteUserAction } from "@/utils/actions";
 import { DeleteTwoTone, EditTwoTone } from "@ant-design/icons";
-import { Button, Popconfirm, Table } from "antd"
+import { Button, Popconfirm, Table, Tag } from "antd"
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { useState } from "react";
 import UserCreate from "@/components/admin/user.create";
@@ -52,7 +52,11 @@ const UserTable = (props: IProps) => {
         {
             title: 'Kích hoạt TK',
             dataIndex: 'isActive',
-            render: (text: boolean) => (text ? 'Đã kích hoạt' : 'Chưa kích hoạt'),
+            render: (isActive: boolean) => (
+                <Tag color={isActive ? 'green' : 'red'}>
+                    {isActive ? 'Đã kích hoạt' : 'Chưa kích hoạt'}
+                </Tag>
+            ),
         },
         {
             title: 'Trạng Thái',

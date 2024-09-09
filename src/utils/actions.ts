@@ -92,3 +92,54 @@ export const handleLogoutAction = async (email: string) => {
         throw new Error("Logout failed");
     }
 }
+export const handleCreateCategoryAction = async (data: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`,
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: { ...data }
+    });
+    revalidateTag("list-categories");
+    return res;
+}
+export const handleUpdateCategoryAction = async (data: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`,
+        method: "PUT",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: { ...data }
+    });
+    revalidateTag("list-categories");
+    return res;
+}
+export const handleDeleteCategoryAction = async (id: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories/${id}`,
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    });
+    revalidateTag("list-categories");
+    return res;
+}
+export const handleToggleCategoryAction = async (id: string) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories/hide/${id}`,
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    });
+    revalidateTag("list-categories");
+    return res;
+}
+
