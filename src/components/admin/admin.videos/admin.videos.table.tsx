@@ -1,201 +1,235 @@
 'use client'
-import React from 'react'
-import { Button, Space, Table, Tag } from 'antd';
+import React, { useEffect, useState } from 'react'
+import { Button, Space, Table, Tag, Image, message } from 'antd';
 import type { TableProps } from 'antd';
-import { useRouter } from 'next/navigation';
-interface DataType {
-    key: string;
-    name: string;
-    thumbnail: string;
-    category: string;
-    duration: string;
-    createdAt: string;
-    size: string;
-    resolution: string;
-    type: string;
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { handleFindOneCategoryAction } from '@/utils/actions';
+
+interface IProps {
+    videos: any[];
+    meta: {
+        current: number;
+        pageSize: number;
+        pages: number;
+        total: number;
+    }
 }
 
-const columns: TableProps<DataType>['columns'] = [
-    {
-        title: 'Thumbnail',
-        dataIndex: 'thumbnail',
-        key: 'thumbnail',
-        width: '10%',
-        render: (text) => <a>{text}</a>,
-    },
-    {
-        title: 'Tên video',
-        dataIndex: 'name',
-        key: 'name',
-    },
-    {
-        title: 'Danh mục',
-        dataIndex: 'category',
-        key: 'category',
-    },
-    {
-        title: 'Loại video',
-        key: 'type',
-        dataIndex: 'type',
-        render: (type: string) => (
-            <Tag color={type === 'movie' ? 'blue' : 'green'}>
-                {type === 'movie' ? 'Phim lẻ' : 'Phim bộ'}
-            </Tag>
-        ),
-    },
-    {
-        title: 'Thời lượng',
-        key: 'duration',
-        dataIndex: 'duration',
-        render: (duration: string) => {
-            // Ensure the duration is in the format 00:00:00
-            const formattedDuration = duration.length === 8 ? duration : '00:00:00';
-            return <span>{formattedDuration}</span>;
-        },
-    },
-    {
-        title: 'Kích thước',
-        key: 'size',
-        dataIndex: 'size',
-    },
-    {
-        title: 'Chất lượng',
-        key: 'resolution',
-        dataIndex: 'resolution',
-    },
-    {
-        title: 'Ngày tạo',
-        dataIndex: 'createdAt',
-        key: 'createdAt',
-        render: (createdAt: string) => {
-            const date = new Date(createdAt);
-            return date.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric'
-            });
-        },
-    },
-
-    {
-        title: 'Hành động',
-        key: 'action',
-        render: (_, record) => (
-            <Space size="middle">
-                <Button style={{
-                    backgroundColor: '#6A9C89',
-                    color: '#E9EFEC',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 15px',
-                    transition: 'all 0.3s',
-                    height: '20px',
-                }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
-                    Xem
-                </Button>
-                <Button style={{
-                    backgroundColor: '#6A9C89',
-                    color: '#E9EFEC',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 15px',
-                    transition: 'all 0.3s',
-                    height: '20px',
-                }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
-                    M3u8
-                </Button>
-                <Button style={{
-                    backgroundColor: '#6A9C89',
-                    color: '#E9EFEC',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 15px',
-                    transition: 'all 0.3s',
-                    height: '20px',
-                }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
-                    Embed
-                </Button>
-                <Button style={{
-                    backgroundColor: '#6A9C89',
-                    color: '#E9EFEC',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 15px',
-                    transition: 'all 0.3s',
-                    height: '20px',
-                }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
-                    Sửa
-                </Button>
-                <Button style={{
-                    backgroundColor: '#C4DAD2',
-                    color: '#16423C',
-                    border: 'none',
-                    borderRadius: '4px',
-                    padding: '5px 15px',
-                    transition: 'all 0.3s',
-                    height: '20px',
-                }}
-                    onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = '#16423C';
-                        e.currentTarget.style.color = '#E9EFEC';
-                    }}
-                    onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = '#C4DAD2';
-                        e.currentTarget.style.color = '#16423C';
-                    }}>
-                    Xóa
-                </Button>
-            </Space>
-        ),
-    },
-];
-
-const data: DataType[] = [
-    {
-        key: '1',
-        name: 'John Brown',
-        thumbnail: 'https://via.placeholder.com/150',
-        category: 'Category 1',
-        duration: '01:00:00',
-        createdAt: '2021-01-01',
-        type: 'series',
-        size: '100MB',
-        resolution: '1080p',
-    },
-    {
-        key: '2',
-        name: 'Jim Green',
-        thumbnail: 'https://via.placeholder.com/150',
-        category: 'Category 2',
-        duration: '01:00:00',
-        createdAt: '2021-01-01',
-        type: 'series',
-        size: '100MB',
-        resolution: '1080p',
-    },
-    {
-        key: '3',
-        name: 'Joe Black',
-        thumbnail: 'https://via.placeholder.com/150',
-        category: 'Category 3',
-        duration: '01:00:00',
-        createdAt: '2021-01-01',
-        type: 'movie',
-        size: '100MB',
-        resolution: '1080p',
-    },
-];
-
-const VideoPage: React.FC = () => {
+const VideoPage = (props: IProps) => {
+    const { videos, meta } = props;
     const router = useRouter();
+    const [categories, setCategories] = useState<{ [key: string]: string }>({});
+    const searchParams = useSearchParams();
+    const pathname = usePathname();
+    const { replace } = useRouter();
+    useEffect(() => {
+        const fetchCategories = async () => {
+            const categoryIds = Array.from(new Set(videos.map(video => video.category)));
+            const categoryData: { [key: string]: string } = {};
+            for (const id of categoryIds) {
+                if (!categories[id]) {
+                    const res = await handleFindOneCategoryAction(id);
+                    if (res.data) {
+                        categoryData[id] = res.data.name;
+                    }
+                }
+            }
+            if (Object.keys(categoryData).length > 0) {
+                setCategories(prevCategories => ({...prevCategories, ...categoryData}));
+            }
+        };
+        fetchCategories();
+    }, [videos, categories]);
+    const onChange = (pagination: any) => {
+        if (pagination && pagination.current) {
+            const params = new URLSearchParams(searchParams);
+            params.set('current', pagination.current);
+            replace(`${pathname}?${params.toString()}`);
+        }
+    };
+    const columns: TableProps<any>['columns'] = [
+        {
+            title: 'Thumbnail',
+            dataIndex: 'poster',
+            key: 'poster',
+            width: '10%',
+            render: (text) =>
+                <Image
+                    src={text}
+                    alt="poster"
+                    width={130}
+                    style={{ width: '100%', height: 'auto', borderRadius: '5px' }}
+                />
+        },
+        {
+            title: 'Tên video',
+            dataIndex: 'title',
+            key: 'title',
+        },
+        {
+            title: 'Loại video',
+            key: 'type_movie',
+            dataIndex: 'type_movie',
+            render: (type_movie: string) => (
+                <Tag color={type_movie === 'movie' ? 'blue' : 'green'}>
+                    {type_movie === 'movie' ? 'Phim lẻ' : 'Phim bộ'}
+                </Tag>
+            ),
+        },
+        {
+            title: 'Danh mục',
+            dataIndex: 'category',
+            key: 'category',
+            render: (categoryId: string) => categories[categoryId] || categoryId,
+        },
+
+        {
+            title: 'Thời lượng',
+            key: 'duration',
+            dataIndex: 'duration',
+            render: (duration: number) => {
+                const hours = Math.floor(duration / 3600);
+                const minutes = Math.floor((duration % 3600) / 60);
+                const seconds = duration % 60;
+                const formattedDuration = [
+                    hours.toString().padStart(2, '0'),
+                    minutes.toString().padStart(2, '0'),
+                    seconds.toString().padStart(2, '0')
+                ].join(':');
+                return <span>{formattedDuration}</span>;
+            },
+        },
+        {
+            title: 'Kích thước',
+            key: 'size',
+            dataIndex: 'size',
+            render: (size: number) => {
+                const sizeInMB = size / (1024 * 1024);
+                if (sizeInMB < 1000) {
+                    return `${sizeInMB.toFixed(2)} MB`;
+                } else {
+                    const sizeInGB = sizeInMB / 1024;
+                    return `${sizeInGB.toFixed(2)} GB`;
+                }
+            },
+        },
+        {
+            title: 'Chất lượng',
+            key: 'resolution',
+            dataIndex: 'resolution',
+        },
+        {
+            title: 'Công khai',
+            key: 'isPublic',
+            dataIndex: 'isPublic',
+            render: (isPublic: boolean) => (
+                <Tag color={isPublic ? 'green' : 'red'}>
+                    {isPublic ? 'Công khai' : 'Riêng tư'}
+                </Tag>
+            ),
+        },
+        {
+            title: 'Ngày tạo',
+            dataIndex: 'createdAt',
+            key: 'createdAt',
+            render: (createdAt: string) => {
+                const date = new Date(createdAt);
+                return date.toLocaleDateString('en-GB', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric'
+                });
+            },
+        },
+
+        {
+            title: 'Hành động',
+            key: 'action',
+            render: (_, record) => (
+                <Space size="middle">
+                    <Button style={{
+                        backgroundColor: '#6A9C89',
+                        color: '#E9EFEC',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '5px 15px',
+                        transition: 'all 0.3s',
+                        height: '25px',
+                    }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
+                        Xem
+                    </Button>
+                    {/* <Button style={{
+                        backgroundColor: '#6A9C89',
+                        color: '#E9EFEC',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '5px 15px',
+                        transition: 'all 0.3s',
+                        height: '20px',
+                    }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
+                        M3u8
+                    </Button> */}
+                    <Button
+                        style={{
+                            backgroundColor: '#6A9C89',
+                            color: '#E9EFEC',
+                            border: 'none',
+                            borderRadius: '4px',
+                            padding: '5px 15px',
+                            transition: 'all 0.3s',
+                            height: '25px',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}
+                        onClick={() => {
+                            const watchUrl = `${process.env.NEXT_PUBLIC_FRONTEND_URL}/watch/${record.uuid}`;
+                            navigator.clipboard.writeText(watchUrl);
+                            message.success('Đã sao chép đường dẫn xem video');
+                        }}
+                    >
+                        Embed
+                    </Button>
+                    <Button style={{
+                        backgroundColor: '#6A9C89',
+                        color: '#E9EFEC',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '5px 15px',
+                        transition: 'all 0.3s',
+                        height: '25px',
+                    }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#16423C'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
+                        Sửa
+                    </Button>
+                    <Button style={{
+                        backgroundColor: '#C4DAD2',
+                        color: '#16423C',
+                        border: 'none',
+                        borderRadius: '4px',
+                        padding: '5px 15px',
+                        transition: 'all 0.3s',
+                        height: '25px',
+                    }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.backgroundColor = '#16423C';
+                            e.currentTarget.style.color = '#E9EFEC';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.backgroundColor = '#C4DAD2';
+                            e.currentTarget.style.color = '#16423C';
+                        }}>
+                        Xóa
+                    </Button>
+                </Space>
+            ),
+        },
+    ];
+
     return (
         <>
             <div style={{
@@ -214,7 +248,20 @@ const VideoPage: React.FC = () => {
                     zIndex: 1
                 }}>Thêm Video</Button>
             </div>
-            <Table bordered columns={columns} dataSource={data} />
+            <Table
+                bordered
+
+                columns={columns}
+                dataSource={videos}
+                rowKey="_id"
+                pagination={{
+                    current: meta.current,
+                    pageSize: meta.pageSize,
+                    total: meta.total,
+                    showTotal: (total, range) => `${range[0]}-${range[1]} trên ${total} mục`,
+                }}
+                onChange={onChange}
+            />
         </>
     );
 };

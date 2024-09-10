@@ -1,15 +1,66 @@
 'use client'
-import React from 'react'
-import { Button, Divider, Form, Input, Select, Switch, Upload, Row, Col } from 'antd'
+import React, { useState, useEffect } from 'react'
+import { Button, Divider, Form, Input, Select, Switch, Upload, Row, Col, message, notification } from 'antd'
 import { UploadOutlined } from '@ant-design/icons'
+import { handleCreateVideoAction, handleGetCategoryAction, handleUploadImageAction } from '@/utils/actions'
 
 const { Option } = Select
 
 const AdminVideosAdd = () => {
     const [form] = Form.useForm()
+    const [categories, setCategories] = useState<any>([])
+    const [fileList, setFileList] = useState<any[]>([])
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
 
-    const onFinish = (values: any) => {
-        console.log('Form values:', values)
+    useEffect(() => {
+        const getCategories = async () => {
+            const res = await handleGetCategoryAction();
+            if (res?.data?.results) {
+                const activeCategories = res.data.results.filter((category: any) => category.isActive === true);
+                setCategories(activeCategories);
+            }
+        }
+        getCategories();
+    }, []);
+
+    const onFinish = async (values: any) => {
+        const res = await handleCreateVideoAction(values);
+        if (res?.data) {
+            message.success("Tạo video thành công")
+            form.resetFields();
+            setFileList([]);
+            setUploadedImageUrl(null);
+        } else {
+            notification.error({
+                message: "Create Video error",
+                description: res?.message
+            })
+        }
+    }
+
+    const handleUploadImage = async (options: any) => {
+        const { file, onSuccess, onError } = options;
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+            const res = await handleUploadImageAction(formData);
+            if (res?.data?.data?.url) {
+                const imageUrl = res.data.data.url;
+                setUploadedImageUrl(imageUrl);
+                form.setFieldsValue({ poster: imageUrl });
+                onSuccess("OK");
+                message.success("Tải lên hình ảnh thành công");
+            } else {
+                throw new Error('Không nhận được URL hình ảnh từ server');
+            }
+        } catch (error: any) {
+            onError("Tải lên thất bại");
+            notification.error({
+                message: "Lỗi khi tải lên",
+                description: error.message || "Đã xảy ra lỗi khi tải lên hình ảnh. Vui lòng thử lại sau."
+            });
+            console.error("Upload error:", error);
+        }
     }
 
     return (
@@ -27,12 +78,10 @@ const AdminVideosAdd = () => {
                 layout="horizontal"
                 onFinish={onFinish}
                 labelCol={{ span: 4 }}
-              
                 labelAlign='left'
             >
                 <Row gutter={24}>
                     <Col span={15} style={{
-
                         backgroundColor: 'white',
                         padding: '20px',
                         marginRight: '20px',
@@ -57,26 +106,20 @@ const AdminVideosAdd = () => {
                         <Form.Item
                             name="poster"
                             label="Hình nền Thumbnail"
-                            valuePropName="fileList"
-                            getValueFromEvent={(e) => {
-                                if (Array.isArray(e)) {
-                                    return e
-                                }
-                                return e && e.fileList
-                            }}
+                            rules={[{ required: true, message: 'Vui lòng chọn hình nền!' }]}
                         >
-                            <Upload name="poster" listType="picture">
+                            <Upload
+                                name="file"
+                                listType="picture"
+                                customRequest={handleUploadImage}
+                                maxCount={1}
+                                fileList={fileList}
+                                onChange={({ fileList }) => setFileList(fileList)}
+                            >
                                 <Button icon={<UploadOutlined />}>Chọn ảnh</Button>
                             </Upload>
                         </Form.Item>
 
-                        <Form.Item
-                            name="status"
-                            label="Trạng thái"
-                            valuePropName="checked"
-                        >
-                            <Switch />
-                        </Form.Item>
                         <Divider />
                         <Form.Item
                             name="isPublic"
@@ -85,13 +128,20 @@ const AdminVideosAdd = () => {
                         >
                             <Switch />
                         </Form.Item>
+                        <Divider />
+                        <Form.Item>
+                            <Button
+                                type="primary"
+                                htmlType="submit"
+                                style={{ backgroundColor: '#6A9C89', color: '#FFFFFF', marginTop: 10 }}>
+                                Thêm video
+                            </Button>
+                        </Form.Item>
                     </Col>
                     <Col span={8} style={{
                         backgroundColor: 'white',
                         padding: '20px',
                         borderRadius: '5px',
-                        
-
                     }}>
                         <Form.Item
                             name="type_movie"
@@ -110,20 +160,13 @@ const AdminVideosAdd = () => {
                             rules={[{ required: true, message: 'Vui lòng chọn danh mục!' }]}
                         >
                             <Select>
-                                <Option value="action">Hành động</Option>
-                                <Option value="comedy">Hài hước</Option>
-                                <Option value="drama">Kịch</Option>
-                                {/* Thêm các danh mục khác tại đây */}
+                                {Array.isArray(categories) && categories.length > 0 ? categories.map((category: any) => (
+                                    <Option key={category?._id} value={category?._id}>{category?.name}</Option>
+                                )) : <Option value="">Không có danh mục</Option>}
                             </Select>
                         </Form.Item>
                     </Col>
                 </Row>
-
-                <Form.Item>
-                    <Button type="primary" htmlType="submit" style={{ backgroundColor: '#6A9C89', color: '#FFFFFF' }}>
-                        Thêm video
-                    </Button>
-                </Form.Item>
             </Form>
         </>
     )

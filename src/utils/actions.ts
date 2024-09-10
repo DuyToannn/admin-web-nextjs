@@ -92,6 +92,20 @@ export const handleLogoutAction = async (email: string) => {
         throw new Error("Logout failed");
     }
 }
+
+export const handleGetCategoryAction = async () => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories`,
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    });
+    revalidateTag("list-categories");
+    return res;
+}
+
 export const handleCreateCategoryAction = async (data: any) => {
     const session = await auth();
     const res = await sendRequest<IBackendRes<any>>({
@@ -142,4 +156,48 @@ export const handleToggleCategoryAction = async (id: string) => {
     revalidateTag("list-categories");
     return res;
 }
+export const handleFindOneCategoryAction = async (id: string) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/categories/${id}`,
+        method: "GET",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    });
+    revalidateTag("list-categories");
+    return res;
+}
 
+
+export const handleCreateVideoAction = async (data: any) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/videos`,
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+        body: { ...data }
+    });
+    revalidateTag("list-videos");
+    return res;
+}
+
+export const handleUploadImageAction = async (formData: FormData) => {
+    try {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/cloudinary/upload`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        });
+        if (response.status === 201) {
+            return response.data;
+        } else {
+            throw new Error('Upload failed');
+        }
+    } catch (error) {
+        console.error('Error uploading image:', error);
+        throw error;
+    }
+}
