@@ -201,3 +201,15 @@ export const handleUploadImageAction = async (formData: FormData) => {
         throw error;
     }
 }
+export const handleDeleteVideoAction = async (id: string) => {
+    const session = await auth();
+    const res = await sendRequest<IBackendRes<any>>({
+        url: `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/videos/${id}`,
+        method: "DELETE",
+        headers: {
+            Authorization: `Bearer ${session?.user?.access_token}`,
+        },
+    });
+    revalidateTag("list-videos");
+    return res;
+}

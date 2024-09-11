@@ -1,9 +1,10 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Button, Space, Table, Tag, Image, message } from 'antd';
+import { Button, Space, Table, Tag, Image, message, Popconfirm,  } from 'antd';
 import type { TableProps } from 'antd';
+import { DeleteTwoTone } from "@ant-design/icons";
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { handleFindOneCategoryAction } from '@/utils/actions';
+import { handleFindOneCategoryAction, handleDeleteVideoAction } from '@/utils/actions';
 
 interface IProps {
     videos: any[];
@@ -35,7 +36,7 @@ const VideoPage = (props: IProps) => {
                 }
             }
             if (Object.keys(categoryData).length > 0) {
-                setCategories(prevCategories => ({...prevCategories, ...categoryData}));
+                setCategories(prevCategories => ({ ...prevCategories, ...categoryData }));
             }
         };
         fetchCategories();
@@ -47,6 +48,14 @@ const VideoPage = (props: IProps) => {
             replace(`${pathname}?${params.toString()}`);
         }
     };
+    const handleDeleteVideo = async (id: string) => {
+        const res = await handleDeleteVideoAction(id)
+        if (res) {
+            message.success("Xóa video thành công")
+        } else {
+            message.error("Xóa video thất bại")
+        }
+    }
     const columns: TableProps<any>['columns'] = [
         {
             title: 'Thumbnail',
@@ -58,7 +67,7 @@ const VideoPage = (props: IProps) => {
                     src={text}
                     alt="poster"
                     width={130}
-                    style={{ width: '100%', height: 'auto', borderRadius: '5px' }}
+                    style={{ width: '100%', height: '100px', objectFit: 'cover', borderRadius: '5px' }}
                 />
         },
         {
@@ -88,14 +97,11 @@ const VideoPage = (props: IProps) => {
             key: 'duration',
             dataIndex: 'duration',
             render: (duration: number) => {
-                const hours = Math.floor(duration / 3600);
-                const minutes = Math.floor((duration % 3600) / 60);
-                const seconds = duration % 60;
-                const formattedDuration = [
-                    hours.toString().padStart(2, '0'),
-                    minutes.toString().padStart(2, '0'),
-                    seconds.toString().padStart(2, '0')
-                ].join(':');
+                const durationInSeconds = Math.round(duration / 1000);
+                const hours = Math.floor(durationInSeconds / 3600);
+                const minutes = Math.floor((durationInSeconds % 3600) / 60);
+                const seconds = durationInSeconds % 60;
+                const formattedDuration = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
                 return <span>{formattedDuration}</span>;
             },
         },
@@ -206,25 +212,34 @@ const VideoPage = (props: IProps) => {
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#6A9C89'}>
                         Sửa
                     </Button>
-                    <Button style={{
-                        backgroundColor: '#C4DAD2',
-                        color: '#16423C',
-                        border: 'none',
-                        borderRadius: '4px',
-                        padding: '5px 15px',
-                        transition: 'all 0.3s',
-                        height: '25px',
-                    }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.backgroundColor = '#16423C';
-                            e.currentTarget.style.color = '#E9EFEC';
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.backgroundColor = '#C4DAD2';
-                            e.currentTarget.style.color = '#16423C';
-                        }}>
-                        Xóa
-                    </Button>
+                    <Popconfirm
+                        title="Bạn có chắc chắn muốn xóa video này?"
+                        onConfirm={() => handleDeleteVideo(record._id)}
+                        okText="Có"
+                        cancelText="Không"
+                    >
+                        <Button 
+                            style={{
+                                backgroundColor: '#C4DAD2',
+                                color: '#16423C',
+                                border: 'none',
+                                borderRadius: '4px',
+                                padding: '5px 15px',
+                                transition: 'all 0.3s',
+                                height: '25px',
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.backgroundColor = '#16423C';
+                                e.currentTarget.style.color = '#E9EFEC';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.backgroundColor = '#C4DAD2';
+                                e.currentTarget.style.color = '#16423C';
+                            }}
+                        >
+                            Xóa
+                        </Button>
+                    </Popconfirm>
                 </Space>
             ),
         },

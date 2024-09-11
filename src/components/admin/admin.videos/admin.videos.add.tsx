@@ -8,9 +8,9 @@ const { Option } = Select
 
 const AdminVideosAdd = () => {
     const [form] = Form.useForm()
-    const [categories, setCategories] = useState<any>([])
+    const [categories, setCategories] = useState<any[]>([])
     const [fileList, setFileList] = useState<any[]>([])
-    const [uploadedImageUrl, setUploadedImageUrl] = useState<string | null>(null)
+    const [uploadedImageUrl, setUploadedImageUrl] = useState<string>('')
 
     useEffect(() => {
         const getCategories = async () => {
@@ -24,12 +24,22 @@ const AdminVideosAdd = () => {
     }, []);
 
     const onFinish = async (values: any) => {
-        const res = await handleCreateVideoAction(values);
+        // Convert values to a plain object
+        const plainValues = JSON.parse(JSON.stringify(values));
+        // Add embed field as a string
+        plainValues.embed = '';
+        // Ensure poster is a string
+        plainValues.poster = plainValues.poster || '';
+        // Add new fields
+        plainValues.size = 0;
+        plainValues.resolution = '';
+        plainValues.duration = 0;
+        const res = await handleCreateVideoAction(plainValues);
         if (res?.data) {
             message.success("Tạo video thành công")
             form.resetFields();
             setFileList([]);
-            setUploadedImageUrl(null);
+            setUploadedImageUrl('');
         } else {
             notification.error({
                 message: "Create Video error",
@@ -108,6 +118,12 @@ const AdminVideosAdd = () => {
                             label="Hình nền Thumbnail"
                             rules={[{ required: true, message: 'Vui lòng chọn hình nền!' }]}
                         >
+                            <Input />
+                        </Form.Item>
+
+                        <Form.Item
+                            label="Tải lên hình nền"
+                        >
                             <Upload
                                 name="file"
                                 listType="picture"
@@ -126,7 +142,7 @@ const AdminVideosAdd = () => {
                             label="Công khai"
                             valuePropName="checked"
                         >
-                            <Switch />
+                            <Switch checkedChildren="True" unCheckedChildren="False" />
                         </Form.Item>
                         <Divider />
                         <Form.Item>
