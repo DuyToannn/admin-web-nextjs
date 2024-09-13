@@ -21,7 +21,7 @@
 
 <p align="center">
 
-<img src="https://picsum.photos/1080/1920" alt="Random Image" width="400px">
+<img src="https://i.imgur.com/6Et9cqg.png" alt="Random Image" width="400px">
 <img src="https://picsum.photos/1080/1920" alt="Random Image" width="400px">
 </p>
 
