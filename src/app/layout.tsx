@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={roboto.className}>
         <AntdRegistry>
           <NextAuthWrapper>
-            {children}
+            {children} 
           </NextAuthWrapper>
         </AntdRegistry>
 
