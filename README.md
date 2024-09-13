@@ -21,8 +21,12 @@
 
 <p align="center">
 
-<img src="https://i.imgur.com/6Et9cqg.png" alt="Random Image" width="400px">
-<img src="https://picsum.photos/1080/1920" alt="Random Image" width="400px">
+<img src="https://i.imgur.com/xhG8SoS.png" alt="Random Image" width="400px">
+<br>
+<img src="https://i.imgur.com/EJVBSWe.png" alt="Random Image" width="400px">
+<br>
+<img src="https://i.imgur.com/LxrKGEz.png" alt="Random Image" width="400px">
+
 </p>
 
 <h2 id="technologies">💻 Technologies</h2>
